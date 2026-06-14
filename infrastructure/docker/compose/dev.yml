@@ -1,0 +1,146 @@
+version: "3.9"
+
+services:
+  # Main web application
+  web:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://gsagents:gsagents@postgres:5432/gsagents
+      - REDIS_URL=redis://redis:6379
+      - OPENHANDS_API_URL=http://openhands:8000
+      - LANGGRAPH_API_URL=http://langgraph:8001
+    depends_on:
+      - postgres
+      - redis
+      - openhands
+    volumes:
+      - ../../apps/web:/app
+      - /app/node_modules
+      - /app/.next
+    command: pnpm dev
+
+  # OpenHands Agent Runtime
+  openhands:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.openhands
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://gsagents:gsagents@postgres:5432/gsagents
+      - REDIS_URL=redis://redis:6379
+      - SANDBOX_RUNTIME=docker
+      - WORKSPACE_DIR=/workspace
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - workspace:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # LangGraph Orchestration
+  langgraph:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.langgraph
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://gsagents:gsagents@postgres:5432/gsagents
+      - OPENHANDS_API_URL=http://openhands:8000
+    depends_on:
+      - postgres
+
+  # Workflow Engine
+  workflow:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.workflow
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql://gsagents:gsagents@postgres:5432/gsagents
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # Browser Agent
+  browser:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.browser
+    ports:
+      - "8003:8003"
+    environment:
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+    volumes:
+      - /ms-playwright:/ms-playwright
+
+  # MCP Gateway
+  mcp:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.mcp
+    ports:
+      - "8090:8090"
+    environment:
+      - DATABASE_URL=postgresql://gsagents:gsagents@postgres:5432/gsagents
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - postgres
+      - redis
+
+  # Code-Server Workspace
+  workspace:
+    build:
+      context: ../../
+      dockerfile: infrastructure/docker/Dockerfile.workspace
+    ports:
+      - "8080:8080"
+    environment:
+      - PASSWORD=gsagents
+      - OPENHANDS_API_URL=http://openhands:8000
+    volumes:
+      - workspace:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=gsagents
+      - POSTGRES_PASSWORD=gsagents
+      - POSTGRES_DB=gsagents
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Vector Store (Qdrant)
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+volumes:
+  workspace:
+  postgres_data:
+  redis_data:
+  qdrant_data:

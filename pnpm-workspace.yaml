@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+  - 'services/*'
+  - 'packages/*'
+  - '!**/node_modules'
+  - '!**/dist'
+  - '!**/.turbo'

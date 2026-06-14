@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: 239 84% 67%;
+  --secondary: 217 91% 60%;
+  --accent: 186 85% 50%;
+}
+
+body {
+  @apply bg-slate-950 text-slate-50;
+}
