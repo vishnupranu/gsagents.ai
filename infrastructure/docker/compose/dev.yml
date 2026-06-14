@@ -4,7 +4,7 @@ services:
   # Main web application
   web:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.web
     ports:
       - "3000:3000"
@@ -27,7 +27,7 @@ services:
   # OpenHands Agent Runtime
   openhands:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.openhands
     ports:
       - "8000:8000"
@@ -46,7 +46,7 @@ services:
   # LangGraph Orchestration
   langgraph:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.langgraph
     ports:
       - "8001:8001"
@@ -59,7 +59,7 @@ services:
   # Workflow Engine
   workflow:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.workflow
     ports:
       - "8002:8002"
@@ -73,7 +73,7 @@ services:
   # Browser Agent
   browser:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.browser
     ports:
       - "8003:8003"
@@ -85,7 +85,7 @@ services:
   # MCP Gateway
   mcp:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.mcp
     ports:
       - "8090:8090"
@@ -99,7 +99,7 @@ services:
   # Code-Server Workspace
   workspace:
     build:
-      context: ../../
+      context: ../..
       dockerfile: infrastructure/docker/Dockerfile.workspace
     ports:
       - "8080:8080"

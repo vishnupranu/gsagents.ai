@@ -1,0 +1,27 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install pnpm globally
+RUN corepack enable && corepack prepare pnpm@9 -g
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+COPY pnpm-workspace.yaml ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY apps/web ./apps/web
+COPY packages ./packages
+COPY turbo.json tsconfig.json ./
+
+# Build the application
+RUN pnpm build --filter=@gsagents/web
+
+EXPOSE 3000
+
+ENV NODE_ENV=production
+
+CMD ["pnpm", "start", "--filter=@gsagents/web"]
